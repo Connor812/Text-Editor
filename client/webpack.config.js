@@ -2,7 +2,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 const path = require('path');
 const { InjectManifest } = require('workbox-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = () => {
   return {
@@ -26,6 +25,8 @@ module.exports = () => {
         swDest: 'src-sw.js',
       }), 
       new WebpackPwaManifest({
+        fingerprints: false,
+        inject: true,
         name: 'Text Editor',
         short_name: 'Text Editor',
         description: 'Just another Text Editor',
@@ -37,24 +38,12 @@ module.exports = () => {
           {
             src: path.resolve('src/images/logo.png'),
             sizes: [96, 128, 192, 256, 384, 512],
-            destination: 'assets/icons',
+            destination: path.join('assets', 'icons'),
             ios: true,
             purpose: 'any maskable',
             rename: 'icon-[width].[ext]'
           },
         ]
-      }),
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: 'src/images',
-            to: path.resolve(__dirname, 'dist/assets/icons'),
-            globOptions: {
-              ignore: ['**/.*'], // ignore dot files and directories
-            },
-            noErrorOnMissing: true, // don't throw error if files don't exist
-          },
-        ],
       }),
     ],
 
@@ -63,15 +52,6 @@ module.exports = () => {
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],
-        },
-        {
-          test: /\.(png|jpe?g|gif)$/i,
-          loader: 'responsive-loader',
-          options: {
-            outputPath: 'assets/icons',
-            name: 'icon-[width].[ext]',
-            sizes: [96, 128, 192, 256, 384, 512],
-          },
         },
         {
           test: /\.m?js$/,
